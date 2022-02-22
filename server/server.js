@@ -1,5 +1,8 @@
 const express = require("express");
 
+// import path 
+const path = require('path');
+
 // import apollo server
 const { ApolloServer } = require("apollo-server-express");
 
@@ -40,6 +43,19 @@ startServer();
 // setup express to use urls
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// Serve up static assets
+// if react is in production serve up files in the build
+// directory
+if(process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '..client/build')));
+}
+
+// Fall through route.  Send to react index.html
+app.get('*',(req,res) => {
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+
+});
 
 // once connected to db start the server
 db.once("open", () => {
