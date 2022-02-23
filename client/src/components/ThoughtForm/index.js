@@ -1,9 +1,38 @@
 import React, { useState } from "react";
+import { useMutation } from "@apollo/client";
+import { ADD_THOUGHT } from "../../utils/mutations";
+import { QUERY_THOUGHTS, QUERY_ME } from "../../utils/queries";
 
 const ThoughtForm = () => {
   const [thoughtText, setText] = useState("");
   const [characterCount, setCharacterCount] = useState(0);
-//handle when user is typing
+  // useMutation hook
+  const [addThought, { error }] = useMutation(ADD_THOUGHT, {
+    // addthought is the new thought
+    update(cache, { data: { addThought } }) {
+      //read what is currently in the cache, might not exist
+      try {
+        const { thoughts } = cache.readQuery({ query: QUERY_THOUGHTS });
+
+        // prepend the newest thought to the front of the array
+        cache.writeQuery({
+          query: QUERY_THOUGHTS,
+          data: { thoughts: [addThought, ...thoughts] },
+        });
+      } catch (e) {
+        console.error(e);
+      }
+
+      // update me objects cache show it shows up on profile page
+      const { me } = cache.readQuery({ query: QUERY_ME });
+      cache.writeQuery({
+        query: QUERY_ME,
+        data: { me: { ...me, thoughts: [...me.thoughts, addThought] } },
+      });
+    },
+  });
+
+  //handle when user is typing
   const handleChange = (event) => {
     if (event.target.value.length <= 280) {
       setText(event.target.value);
@@ -11,17 +40,27 @@ const ThoughtForm = () => {
     }
   };
 
-// handle when user submits thought
-const handleFormSubmit = async event => {
+  // handle when user submits thought
+  const handleFormSubmit = async (event) => {
     event.preventDefault();
-    setText('');
-    setCharacterCount(0);
-};
+
+    try {
+      // add thought to the db
+      await addThought({
+        variables: { thoughtText },
+      });
+      setText("");
+      setCharacterCount(0);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div>
       <p className={`m-0 ${characterCount === 280 ? "text-error" : ""}`}>
         Character Count: {characterCount}/280
+        {error && <span className="ml-2"> Something went wrong...</span>}
       </p>
 
       <form
