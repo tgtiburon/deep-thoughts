@@ -43,3 +43,28 @@ export const QUERY_THOUGHT = gql`
 
 
 `;
+
+// template literal to query user
+export const QUERY_USER = gql `
+    query user($username: String!) {
+        user(username: $username)  {
+            _id
+            username
+            email
+            friendCount
+            friends {
+                _id
+                username
+            }
+            thoughts {
+                _id
+                thoughtText
+                createdAt
+                reactionCount
+            }
+        }
+    }
+
+
+
+`;
