@@ -1,7 +1,18 @@
 import React, { useState } from 'react';
+import { useMutation } from '@apollo/client';
+import { ADD_USER } from '../utils/mutations';    
+
 
 const Signup = () => {
   const [formState, setFormState] = useState({ username: '', email: '', password: '' });
+
+  // This is a closure.  Does not run immediately like useQuery() would.
+  // useMutation Hook creates a js function that wraps around our
+  // mutation code and returns it to us.
+  // The addUser function is returned, as well as the ability to check
+  // for errors
+
+  const [addUser, { error }] = useMutation(ADD_USER);
 
   // update state based on form input changes
   const handleChange = (event) => {
@@ -16,6 +27,17 @@ const Signup = () => {
   // submit form
   const handleFormSubmit = async (event) => {
     event.preventDefault();
+
+    // use try and catch instead of promises to handle errors
+    try { 
+      // execute addUser mutation and pass in varible data from form
+      const { data }   = await addUser({
+        variables: { ...formState}
+      });
+      console.log(data);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
