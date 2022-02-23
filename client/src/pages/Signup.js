@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
-import { ADD_USER } from '../utils/mutations';    
+import { ADD_USER } from '../utils/mutations'; 
+import Auth from '../utils/auth';   
 
 
 const Signup = () => {
@@ -25,15 +26,19 @@ const Signup = () => {
   };
 
   // submit form
+  // Use async & await instead of .then() .catch()
+  // pass data from the form state object
+  // success destructure the data object
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
     // use try and catch instead of promises to handle errors
     try { 
-      // execute addUser mutation and pass in varible data from form
+      // execute addUser mutation and pass in variable data from form
       const { data }   = await addUser({
         variables: { ...formState}
       });
+      Auth.login(data.addUser.token);
       console.log(data);
     } catch (e) {
       console.error(e);
@@ -78,6 +83,8 @@ const Signup = () => {
                 Submit
               </button>
             </form>
+            {/* If there is an error notify */}
+            {error && <div>Sign up failed</div>}    
           </div>
         </div>
       </div>
