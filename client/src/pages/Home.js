@@ -5,6 +5,7 @@ import ThoughtList from "../components/ThoughtList";
 // import { QUERY_THOUGHTS, QUERY_ME_BASIC } from "../utils/queries";
 import Auth from "../utils/auth";
 import FriendList from "../FriendList";
+import ThoughtForm from "../components/ThoughtForm";
 
 const Home = () => {
   // user useQuery hook to make a query request
@@ -29,6 +30,12 @@ const Home = () => {
   return (
     <main>
       <div className="flex-row justify-space-between">
+        {/* If logged in you can post */}
+        {loggedIn && (
+          <div className="col-12 mb-3">
+            <ThoughtForm />
+          </div>
+        )}
         <div className={`col-12 mb-3 ${loggedIn && "col-lg-8"}`}>
           {loading ? (
             <div>Loading...</div>
